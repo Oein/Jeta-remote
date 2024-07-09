@@ -4,6 +4,7 @@
   "main": "dist/index.js",
   "license": "MIT",
   "devDependencies": {
+    "@electron/packager": "^18.3.3",
     "@types/express": "^4.17.21",
     "@types/node": "^20.14.10",
     "electron": "^31.1.0",
@@ -14,5 +15,12 @@
     "express": "^4.19.2",
     "nodejs-file-downloader": "^4.13.0",
     "simple-json-db": "^2.0.0"
+  },
+  "scripts": {
+    "build": "npx tsc",
+    "build:ma": "npx @electron/packager . Jeta --platform=darwin --arch=arm64",
+    "build:mx": "npx @electron/packager . Jeta --platform=darwin --arch=x64",
+    "build:wa": "npx @electron/packager . Jeta --platform=win32 --arch=arm64",
+    "build:wx": "npx @electron/packager . Jeta --platform=win32 --arch=x64"
   }
 }
