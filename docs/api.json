@@ -1,0 +1,69 @@
+{
+  "/turnon": {
+    "description": "Turn on the instance",
+    "query": { "id": "string!" },
+    "response": { "error": "string", "success": "boolean" }
+  },
+  "/isOnline": {
+    "description": "Check if the instance is online",
+    "query": { "id": "string!" },
+    "response": { "online": "boolean" }
+  },
+  "/getConfig": {
+    "description": "Get the instance config",
+    "query": { "id": "string!" },
+    "response": {
+      "error": "string",
+      "success": "boolean",
+      "config": "Instance"
+    }
+  },
+  "/getInstances": {
+    "description": "Get all instances",
+    "response": [{ "id": "string", "name": "string", "online": "boolean" }]
+  },
+  "/createInstance": {
+    "description": "Create a new instance",
+    "body": {
+      "name": "string!",
+      "port": "string!",
+      "ram": "string!",
+      "java": "string! (left blank for default)",
+      "javaArgs": "string! (left blank for default)",
+      "mcArgs": "string! (left blank for default)",
+      "jar": "string!"
+    },
+    "response": { "id": "string" }
+  },
+  "/modifyInstance": {
+    "description": "Modify the instance config",
+    "body": {
+      "cfg": {
+        "name": "string!",
+        "port": "string!",
+        "ram": "string!",
+        "java": "string! (left blank for default)",
+        "javaArgs": "string! (left blank for default)",
+        "mcArgs": "string! (left blank for default)",
+        "jar": "string!"
+      },
+      "id": "string!"
+    },
+    "response": { "success": "boolean", "error": "string" }
+  },
+  "/runCommand": {
+    "description": "Run a command in the instance",
+    "body": { "id": "string!", "command": "string!" },
+    "response": { "success": "boolean", "error": "string" }
+  },
+  "/getlogs": {
+    "description": "Get the instance logs",
+    "query": { "id": "string!" },
+    "response": "string"
+  },
+  "/deleteInstance": {
+    "description": "Delete the instance",
+    "query": { "id": "string!" },
+    "response": { "success": "boolean", "error": "string" }
+  }
+}

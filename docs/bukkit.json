@@ -1,0 +1,27 @@
+{
+  "/versions": {
+    "description": "Get available versions",
+    "query": { "bukkit": "string" },
+    "response": ["string"]
+  },
+  "/builds": {
+    "description": "Get available builds",
+    "query": { "bukkit": "string!", "version": "string!" },
+    "response": ["string"]
+  },
+  "/hasVersion": {
+    "description": "Check if version exists",
+    "query": { "bukkit": "string!", "version": "string!" },
+    "response": "boolean"
+  },
+  "/hasBuild": {
+    "description": "Check if build exists",
+    "query": { "bukkit": "string!", "version": "string!", "build": "string!" },
+    "response": "boolean"
+  },
+  "/downloadJar": {
+    "description": "Download jar",
+    "query": { "bukkit": "string!", "version": "string!", "build": "string!" },
+    "response": { "have": "boolean" }
+  }
+}
