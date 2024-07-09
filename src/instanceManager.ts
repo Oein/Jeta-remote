@@ -43,11 +43,9 @@ const turnOn = (instanceID: string) => {
       : instance.config.javaCommand || "java",
     [
       "-Xmx" + instance.config.ram + "M",
-      `-Dcom.mojang.eula.agree=true`,
       ...(instance.config.javaArgs || "").split(" "),
       "-jar",
       jarPath,
-      "--nogui",
       `-p${port || 25565}`,
       ...(instance.config.mcArgs || "").split(" "),
     ].filter((x) => x),
