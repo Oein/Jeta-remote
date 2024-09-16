@@ -27,6 +27,10 @@ if (configDB.get("serverDir") == undefined)
 if (configDB.get("jarDir") == undefined)
   configDB.set("jarDir", path.join(appDataPath, "jar"));
 
+if (configDB.get("ftpuser") == undefined) configDB.set("ftpuser", "ftpuser");
+if (configDB.get("ftppass") == undefined)
+  configDB.set("ftppass", "strongpsssword");
+
 ensureDir(configDB.get("serverDir"));
 ensureDir(configDB.get("jarDir"));
 
@@ -50,7 +54,10 @@ expressServer.use(express.static(path.join(__dirname, "..", "static")));
 import { API_Handler } from "./instanceManager";
 import { Bukkit_Handler } from "./bukkitAPI";
 
+import FtpSrv from "ftp-srv";
+
 function main() {
+  // expressServer.use(wdv.extensions.express("/webdav", wdvsv));
   expressServer.use("/api", async (req, res) => {
     console.log(req.body);
     const sp = new URLSearchParams(req.query as any);
@@ -88,6 +95,36 @@ function main() {
   ipcEmit = (channel, ...args) => {
     io.emit(channel, ...args);
   };
+
+  const port = PORT + 1;
+  const ftpServer = new FtpSrv({
+    url: "ftp://0.0.0.0:" + port,
+    anonymous: true,
+  });
+
+  ftpServer.on(
+    "login",
+    ({ connection, username, password }, resolve, reject) => {
+      if (
+        username != configDB.get("ftpuser") ||
+        password != configDB.get("ftppass")
+      ) {
+        console.log(
+          "[FTP] A user failed to connect:",
+          connection.id,
+          username,
+          password
+        );
+        return reject(new Error("Invalid username or password"));
+      }
+      console.log("[FTP] A user connected:", connection.id);
+      return resolve({ root: serverDir, cwd: "/" });
+    }
+  );
+
+  ftpServer.listen().then(() => {
+    console.log("Ftp server is starting...");
+  });
 }
 
 main();
