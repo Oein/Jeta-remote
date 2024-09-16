@@ -184,18 +184,21 @@ const getInstances = () => {
 const docsFile = path.join(__dirname, "..", "docs", "api.json");
 const docsContent = readFileSync(docsFile, "utf-8").toString();
 
-export const API_Handler = async (request: Request) => {
-  const path = new URL(request.url).pathname;
-  const query = new URL(request.url).searchParams;
-  console.log("[API]", request.method, path + "?" + query.toString());
+export const API_Handler = async (
+  path: string,
+  query: URLSearchParams,
+  data: any
+) => {
+  console.log("[API]", path + "?" + query.toString());
 
   if (path == "/") {
     return new Response(docsContent, { status: 200 });
   }
-  if (path == "/turnon")
+  if (path == "/turnon") {
     return new Response(JSON.stringify(turnOn(query.get("id")!)), {
       status: 200,
     });
+  }
   if (path == "/isOnline")
     return new Response(
       JSON.stringify({
@@ -214,7 +217,7 @@ export const API_Handler = async (request: Request) => {
       status: 200,
     });
   if (path == "/createInstance") {
-    const body = (await request.json()) as {
+    const body = data as {
       name: string;
       port: string;
       ram: string;
@@ -223,6 +226,7 @@ export const API_Handler = async (request: Request) => {
       mcArgs: string;
       jar: string;
     };
+    console.log(body);
     const id =
       Math.random().toString(36).substring(7) +
       "-" +
@@ -250,7 +254,7 @@ export const API_Handler = async (request: Request) => {
     return new Response(JSON.stringify({ id: id }), { status: 200 });
   }
   if (path == "/modifyInstance") {
-    const body = (await request.json()) as {
+    const body = data as {
       cfg: {
         name: string;
         port: string;
@@ -290,7 +294,7 @@ export const API_Handler = async (request: Request) => {
     return new Response(JSON.stringify({ success: true }), { status: 200 });
   }
   if (path == "/runCommand") {
-    const body = (await request.json()) as {
+    const body = data as {
       id: string;
       command: string;
     };

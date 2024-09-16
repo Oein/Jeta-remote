@@ -1,3 +1,3 @@
-# Jeta
+# Jeta-remote
 
-Electron based minecraft server manager
+Express based minecraft server manager

@@ -1,3 +1,9 @@
+const socket = new io();
+
+socket.on("connect", () => {
+  console.log("connected");
+});
+
 const API = {
   /**
    *
@@ -11,7 +17,7 @@ const API = {
    *   }>}
    */
   turnOn: (id) => {
-    return fetch(`jeta://api/turnon?id=${id}`, {
+    return fetch(`/api/turnon?id=${id}`, {
       method: "POST",
     }).then((res) => res.json());
   },
@@ -23,7 +29,7 @@ const API = {
    * }>}
    */
   isOnline: (id) => {
-    return fetch(`jeta://api/isOnline?id=${id}`).then((res) => res.json());
+    return fetch(`/api/isOnline?id=${id}`).then((res) => res.json());
   },
   /**
    *
@@ -35,7 +41,7 @@ const API = {
    * }>}
    */
   getConfig: (id) => {
-    return fetch(`jeta://api/getConfig?id=${id}`).then((res) => res.json());
+    return fetch(`/api/getConfig?id=${id}`).then((res) => res.json());
   },
   /**
    * @returns {Promise<{
@@ -45,7 +51,7 @@ const API = {
    * }[]>}
    */
   getInstances: () => {
-    return fetch(`jeta://api/getInstances`).then((res) => res.json());
+    return fetch(`/api/getInstances`).then((res) => res.json());
   },
   /**
    *
@@ -71,9 +77,7 @@ const API = {
     //     "1.21",
     //   ].reverse()
     // );
-    return fetch(`jeta://bukkit/versions?bukkit=${bukkit}`).then((res) =>
-      res.json()
-    );
+    return fetch(`/bukkit/versions?bukkit=${bukkit}`).then((res) => res.json());
   },
   /**
    *
@@ -82,9 +86,9 @@ const API = {
    * @returns {Promise<string[]>}
    */
   getBuilds: (bukkit, version) => {
-    return fetch(
-      `jeta://bukkit/builds?bukkit=${bukkit}&version=${version}`
-    ).then((res) => res.json());
+    return fetch(`/bukkit/builds?bukkit=${bukkit}&version=${version}`).then(
+      (res) => res.json()
+    );
   },
   /**
    * @param {string} bukkit
@@ -92,9 +96,9 @@ const API = {
    * @returns {Promise<{boolean}>}
    */
   hasVersion: (bukkit, version) => {
-    return fetch(
-      `jeta://bukkit/hasVersion?bukkit=${bukkit}&version=${version}`
-    ).then((res) => res.json());
+    return fetch(`/bukkit/hasVersion?bukkit=${bukkit}&version=${version}`).then(
+      (res) => res.json()
+    );
   },
   /**
    * @param {string} bukkit
@@ -104,7 +108,7 @@ const API = {
    */
   hasBuild: (bukkit, version, build) => {
     return fetch(
-      `jeta://bukkit/hasBuild?bukkit=${bukkit}&version=${version}&build=${build}`
+      `/bukkit/hasBuild?bukkit=${bukkit}&version=${version}&build=${build}`
     ).then((res) => res.json());
   },
   /**
@@ -116,7 +120,7 @@ const API = {
    */
   downloadJar: (bukkit, version, build) => {
     return fetch(
-      `jeta://bukkit/downloadJar?bukkit=${bukkit}&version=${version}&build=${build}`
+      `/bukkit/downloadJar?bukkit=${bukkit}&version=${version}&build=${build}`
     ).then((res) => res.json());
   },
   /**
@@ -133,9 +137,12 @@ const API = {
    * @returns {Promise<{id: string}>}
    */
   createServer: (data) => {
-    return fetch(`jeta://api/createInstance`, {
+    return fetch(`/api/createInstance`, {
       method: "POST",
       body: JSON.stringify(data),
+      headers: {
+        "Content-Type": "application/json",
+      },
     }).then((res) => res.json());
   },
   /**
@@ -145,9 +152,12 @@ const API = {
    * @returns {Promise<{error: string; success: false;} | {error: null; success: true;}>}
    */
   runCommand: (id, command) => {
-    return fetch(`jeta://api/runCommand`, {
+    return fetch(`/api/runCommand`, {
       method: "POST",
       body: JSON.stringify({ id, command }),
+      headers: {
+        "Content-Type": "application/json",
+      },
     }).then((res) => res.json());
   },
   /**
@@ -165,9 +175,12 @@ const API = {
    * @returns
    */
   modifyConfig: (id, data) => {
-    return fetch(`jeta://api/modifyInstance`, {
+    return fetch(`/api/modifyInstance`, {
       method: "POST",
       body: JSON.stringify({ id, cfg: data }),
+      headers: {
+        "Content-Type": "application/json",
+      },
     }).then((res) => res.json());
   },
   /**
@@ -176,9 +189,7 @@ const API = {
    * @returns {Promise<{success: true; error: null;} | {success: false; error: string;}>}
    */
   removeInstance: (id) => {
-    return fetch(`jeta://api/deleteInstance?id=${id}`).then((res) =>
-      res.json()
-    );
+    return fetch(`/api/deleteInstance?id=${id}`).then((res) => res.json());
   },
   /**
    *
@@ -186,7 +197,7 @@ const API = {
    * @returns {Promise<string>}
    */
   getLogs: (id) => {
-    return fetch(`jeta://api/getlogs?id=${id}`).then((res) => res.text());
+    return fetch(`/api/getlogs?id=${id}`).then((res) => res.text());
   },
 };
 
@@ -220,7 +231,37 @@ const validateInfo = (info) => {
 };
 
 const notyf = new Notyf();
-const ipcRenderer = require("electron").ipcRenderer;
+const evkv = {};
+const ipcRenderer = {
+  on: (event, handler) => {
+    console.log("ipcRenderer.on", event);
+    const wrp = (...args) => {
+      handler(undefined, ...args);
+    };
+    evkv[event] = wrp;
+    socket.on(event, wrp);
+  },
+  removeListener: (event, handler) => {
+    console.log("ipcRenderer.removeListener", event);
+    socket.off(event, evkv[handler]);
+    delete evkv[handler];
+  },
+  once: (event, handler) => {
+    console.log("ipcRenderer.once", event);
+    const wrp = (...args) => {
+      handler(undefined, ...args);
+      delete evkv[handler];
+    };
+    evkv[handler] = wrp;
+    socket.once(event, wrp);
+  },
+  off: (event, handler) => {
+    console.log("ipcRenderer.off", event);
+    const wrp = evkv[handler];
+    socket.off(event, wrp);
+    delete evkv[handler];
+  },
+};
 
 /**
  *
@@ -831,14 +872,15 @@ document.getElementById("createServer").addEventListener("click", () => {
   document.getElementById("submit-server-data").remove();
   document.getElementById("delete-server-data").remove();
   document.getElementById("serverJarFile").innerText = "No file selected";
-  document.getElementById("serverJarFile").addEventListener("click", () => {
+  const sjf = () => {
     selectJAR().then((jar) => {
       if (jar == null)
         document.getElementById("serverJarFile").innerText = "No file selected";
       else document.getElementById("serverJarFile").innerText = jar.name;
     });
-  });
-  document.getElementById("jar-create").addEventListener("click", () => {
+  };
+  document.getElementById("serverJarFile").addEventListener("click", sjf);
+  const jc = () => {
     const v = (id) => document.getElementById(id).value;
     const info = {
       name: v("serverName").trim(),
@@ -859,7 +901,8 @@ document.getElementById("createServer").addEventListener("click", () => {
       closeable = true;
       modal.hide();
     });
-  });
+  };
+  document.getElementById("jar-create").addEventListener("click", jc);
 
   const closeButton = document.getElementById("hide-server-modal");
   const closeHandler = () => {
@@ -870,6 +913,11 @@ document.getElementById("createServer").addEventListener("click", () => {
   const modal = new Modal(document.getElementById("server-modal"), {
     onHide: () => {
       closeButton.removeEventListener("click", closeHandler);
+      document
+        .getElementById("serverJarFile")
+        .removeEventListener("click", sjf);
+      document.getElementById("jar-create").removeEventListener("click", jc);
+
       document.getElementById("modal-body").innerHTML = "";
     },
     closable: false,
