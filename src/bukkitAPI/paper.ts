@@ -23,7 +23,7 @@ export default class PaperAPI implements BukkitAPI {
     return res.data.builds.reverse();
   }
   async getDownloadURL(version: string, build: string) {
-    return `https://papermc.io/api/v2/projects/paper/versions/${version}/builds/${build}/downloads/paper-${version}-${build}.jar`;
+    return `https://api.papermc.io/v2/projects/paper/versions/${version}/builds/${build}/downloads/paper-${version}-${build}.jar`;
   }
 
   hasVersion(version: string) {
